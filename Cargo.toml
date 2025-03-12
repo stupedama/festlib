@@ -1,0 +1,11 @@
+[package]
+name = "festlib"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+opt-level = 1
+
+[dependencies]
+roxmltree = "0.20.0"
+#thiserror = "2.0.11"
