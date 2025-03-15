@@ -1,4 +1,4 @@
-use crate::{Cs, Cv, ExchangeGroup, Metadata, Package, Interaction, Substance};
+use crate::types::{Cs, Cv, ExchangeGroup, Metadata, Package, Interaction, Substance};
 use roxmltree::{Document, Node};
 
 /// Parses the content string into a roxmltree::Document
@@ -114,13 +114,13 @@ pub fn interaction(node: &Node) -> Option<Interaction> {
                 if s.has_tag_name("Substans") {
                     let name = string_value(&s, "Substans");
                     let atc = Cv::new(&s, "Atc");
-                    substances.push(Substance{name, atc});
+                    substances.push(Substance::new(name, atc));
                 }
             }
         }
     }
 
-    Some(Interaction {
+    Some(Interaction::new(
         metadata,
         id,
         relevance,
@@ -129,7 +129,7 @@ pub fn interaction(node: &Node) -> Option<Interaction> {
         basis,
         handling,
         substances
-    })
+    ))
         },
         None => None,
     }
@@ -164,7 +164,7 @@ pub fn package(node: &Node) -> Option<Package> {
             let ean = string_value(&node, "Ean");
             let exchange_group = exchange_group(&node);
 
-            Some(Package {
+            Package::from(
                 metadata,
                 atc,
                 name,
@@ -173,7 +173,7 @@ pub fn package(node: &Node) -> Option<Package> {
                 itemnum,
                 ean,
                 exchange_group,
-            })
+            )
     },
         None => None,
     }
@@ -231,11 +231,11 @@ pub fn exchange_group(node: &Node) -> Option<ExchangeGroup> {
     }
 
     if id.len() > 0 {
-        Some(ExchangeGroup {
+        ExchangeGroup::from(
             id,
-            valid_to: None,
-            valid_from: None,
-        })
+            None,
+            None,
+        )
         } else {
         None
     }
@@ -329,8 +329,8 @@ mod tests {
         let node = document.get_node(NodeId::new(701764)).unwrap();
 
         let package = package(&node);
-        assert_eq!(package.as_ref().unwrap().id, "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
-        assert_eq!(package.unwrap().itemnum, "953335");
+        assert_eq!(package.as_ref().unwrap().id(), "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
+        assert_eq!(package.unwrap().itemnum(), "953335");
     }
 
     #[test]

@@ -40,206 +40,11 @@
 //!
 
 mod xml;
+mod types;
 
 use std::fs;
 use std::error::Error;
-use roxmltree::Node;
-
-/// Holds the last date for when the fest was last
-/// updated. (HentetDato).
-pub struct LastUpdate {
-    update: String,
-}
-
-impl LastUpdate {
-    fn new(date: &str) -> Self {
-        LastUpdate {
-            update: String::from(date),
-        }
-    }
-
-    pub fn date(&self) -> &String {
-        &self.update
-    }
-
-}
-
-/// Holds the id reference for generic packages/drugs
-#[derive(Debug, Clone)]
-struct ExchangeGroup {
-    id: String,
-    valid_from: Option<String>,
-    valid_to: Option<String>,
-}
-
-impl ExchangeGroup {
-    fn new(node: &Node) -> Option<ExchangeGroup> {
-        xml::exchange_group(&node)
-    }
-
-    pub fn id(self) -> String {
-        self.id
-    }
-}
-
-/// Coded Simple Value
-/// Gives a codes value with a String with an option
-/// to give the 'v' a meaning 'dn'
-#[derive(Debug, Clone)]
-struct Cs {
-    v: String,
-    dn: String,
-}
-
-impl Cs {
-    fn new(node: &Node, tag: &str) -> Self {
-        let (v, dn) = xml::cs(node, tag);
-
-        Cs {
-            v,
-            dn,
-        }
-    }
-}
-
-/// Coded Value with a OID (object identifier)
-/// s = oid.
-/// the oid have a constant value but the last part
-/// is the identifier
-#[derive(Debug, Clone)]
-struct Cv {
-    v: String,
-    s: String,
-    dn: String,
-}
-
-impl Cv {
-    fn new(node: &Node, tag: &str) -> Self {
-        let (v, s, dn) = xml::cv(node, tag);
-
-        Cv {
-            v,
-            s,
-            dn,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Metadata {
-    id: String,
-    time: String,
-    status: Cs,
-}
-
-impl Metadata {
-    fn new(node: &Node) -> Self {
-        let (id, time) = xml::metadata(node);
-        let status = Cs::new(&node, "Status");
-
-        Metadata {
-            id,
-            time,
-            status,
-        }
-    }
-}
-
-/// Holds the information about the drug package (Legemiddelpakning).
-#[derive(Debug, Clone)]
-pub struct Package {
-    metadata: Metadata,
-    atc: Cv,
-    name: String,
-    group: Cs,
-    id: String,
-    itemnum: String,
-    ean: String,
-    exchange_group: Option<ExchangeGroup>,
-}
-
-impl Package {
-    fn new(node: &Node) -> Option<Self> {
-        xml::package(&node)
-    }
-
-    /// Returns the EAN code for the package
-    pub fn ean(&self) -> &String {
-        &self.ean
-    }
-
-    /// Returns the itemnumber (varenr) for the package
-    pub fn itemnum(&self) -> &String {
-        &self.itemnum
-    }
-
-    /// Returns the exchange id reference for generic
-    /// products. Returns None if there is no id
-    /// TODO: or the id is not longer valid
-    pub fn exchange_id(&self) -> Option<&String> {
-        match &self.exchange_group {
-            Some(e) => Some(&e.id),
-            None => None,
-        }
-    }
-}
-
-
-#[derive(Debug, Clone)]
-struct Substance {
-    name: String,
-    atc: Cv,
-}
-
-impl Substance {
-    fn new(name: &str, atc: Cv) -> Self {
-        Substance {
-            name: String::from(name),
-            atc,
-        }
-    }
-
-    /// drug name
-    fn name(&self) -> &String {
-        &self.name
-    }
-
-    /// Atc code the interaction applies to
-    fn atc(&self) -> &String {
-        &self.atc.v
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Interaction {
-    metadata: Metadata,
-    id: String,
-    relevance: Cs,
-    consequence: String,
-    mechanism: String,
-    basis: Cs,
-    handling: String,
-    //Visningsregler: <Vec<Cv>,
-    //references: Vec<Reference>,
-    substances: Vec<Substance>,
-}
-
-impl Interaction {
-    fn new(metadata: Metadata, id: String,
-        relevance: Cs, consequence: String,
-        mechanism: String, basis: Cs, handling: String,
-        substances: Vec<Substance>) -> Self {
-        Interaction {
-            metadata, id, relevance, consequence,
-            mechanism, basis, handling, substances
-        }
-    }
-
-    /// Substances the interaction applies to
-    fn substances(&self) -> &Vec<Substance> {
-        &self.substances
-    }
-}
+use crate::types::{Package, Interaction, LastUpdate};
 
 /// Container for the fest file
 pub struct Fest {
@@ -311,7 +116,7 @@ impl Fest {
     /// assert_eq!(result.unwrap().itemnum(), "061561");
     /// ```
     pub fn find_package(&self, itemnum: &str) -> Option<&Package> {
-        self.packages().iter().find(|p| p.itemnum == itemnum)
+        self.packages().iter().find(|p| p.itemnum() == itemnum)
     }
 
     /// Search for generic products of a Package
@@ -367,7 +172,7 @@ impl Fest {
         let mut result = Vec::new();
 
         // extract the package atc codes and remove duplicates
-        let mut atc_codes: Vec<String> = packages.iter().map(|p| p.atc.v.clone()).collect();
+        let mut atc_codes: Vec<String> = packages.iter().map(|p| p.atc().v().clone()).collect();
         atc_codes.dedup();
 
         // first search all interactions for the atc code.
@@ -411,7 +216,7 @@ impl Fest {
 
         // TODO: maybe we should store the result in a map?
         // clear our result with dublicate interactions
-        result.dedup_by_key(|r| r.id.clone());
+        result.dedup_by_key(|r| r.id().clone());
 
         if result.len() > 0 {
             Some(result)
@@ -430,7 +235,6 @@ impl Fest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use roxmltree::NodeId;
 
     #[test]
     fn test_read_file() {
@@ -448,78 +252,6 @@ mod tests {
     }
 
     #[test]
-    fn test_metadata() {
-        let fest = Fest::new("fest251.xml").unwrap();
-
-        let content = fest.content;
-        let content = roxmltree::Document::parse(&content[0..]).unwrap();
-
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-        let metadata = Metadata::new(&node);
-
-        assert_eq!(metadata.id, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
-        assert_eq!(metadata.time, "2024-04-21T00:51:31");
-    }
-
-    #[test]
-    fn test_cs() {
-        let fest = Fest::new("fest251.xml").unwrap();
-
-        let content = fest.content;
-        let content = roxmltree::Document::parse(&content[0..]).unwrap();
-
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-        let metadata = Metadata::new(&node);
-
-        let cs = metadata.status;
-
-        assert_eq!(cs.v, "A");
-    }
-
-    #[test]
-    fn test_cv() {
-        let fest = Fest::new("fest251.xml").unwrap();
-
-        let content = fest.content;
-        let content = roxmltree::Document::parse(&content[0..]).unwrap();
-
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-
-        let mut move_forward = None;
-
-        // lets move the node into <Legemiddelpakning>
-        for x in node.children() {
-            if x.has_tag_name("Legemiddelpakning") {
-                move_forward = Some(x.clone());
-                break;
-            }
-        }
-
-        let cv = Cv::new(&move_forward.unwrap(), "LegemiddelformKort");
-
-        assert_eq!(cv.v, "32");
-        assert_eq!(cv.s, "2.16.578.1.12.4.1.1.7448");
-        assert_eq!(cv.dn, "Kapsel");
-    }
-
-    #[test]
-    fn test_package() {
-        let fest = Fest::new("fest251.xml").unwrap();
-
-        let content = fest.content;
-        let content = roxmltree::Document::parse(&content[0..]).unwrap();
-
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-
-        let package = Package::new(&node).unwrap();
-
-        assert_eq!(package.id, "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
-        assert_eq!(package.itemnum, "953335");
-        assert_eq!(package.ean, "6430013130724");
-    }
-
-
-    #[test]
     fn test_fest_packages() {
         let fest = Fest::new("fest251.xml").unwrap();
         let packages = fest.packages();
@@ -535,7 +267,7 @@ mod tests {
         assert_eq!(packages.len(), 10473);
 
         let package = fest.find_package("061561").unwrap();
-        assert_eq!(package.itemnum, "061561");
+        assert_eq!(package.itemnum(), "061561");
     }
 
    // #[test]
@@ -561,7 +293,7 @@ mod tests {
         assert_eq!(packages.len(), 10473);
 
         let package = fest.find_package("061561").unwrap();
-        assert_eq!(package.itemnum, "061561");
+        assert_eq!(package.itemnum(), "061561");
 
         let result = fest.find_generic(&package);
         assert!(result.is_some());
