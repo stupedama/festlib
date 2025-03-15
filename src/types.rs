@@ -128,7 +128,15 @@ pub struct Package {
 }
 
 impl Package {
-    pub fn from(metadata: Metadata, atc: Cv, name: String, group: Cs, id: String, itemnum: String, ean: String, exchange_group: Option<ExchangeGroup>) -> Option<Self> {
+    pub fn from(
+        metadata: Metadata,
+        atc: Cv,
+        name: String,
+        group: Cs,
+        id: String,
+        itemnum: String,
+        ean: String,
+        exchange_group: Option<ExchangeGroup>) -> Option<Self> {
         Some(Package {
             metadata, atc, name, group, id, itemnum, ean, exchange_group
         })
