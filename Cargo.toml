@@ -1,7 +1,19 @@
 [package]
 name = "festlib"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2021"
+authors = ["Fredrik Fjeldvær <fredrik@ffj.no>"]
+description = "Parses the fest xml file from DMP"
+readme = "README.md"
+repository = "https://github.com/stupedama/festlib"
+license = "MIT"
+keywords = ["fest", "dmp", "medical", "drug"]
+categories = ["xml"]
+exclude = ["/fest251.xml", "/xml-doc"]
+publish = false
+
+[profile.release]
+opt-level = 3
 
 [profile.dev]
 opt-level = 1
