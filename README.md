@@ -1,5 +1,5 @@
 # festlib - a rust library for parsing fest file from DMP
-
+![Tests](https://github.com/stupedama/festlib/actions/workflows/rust.yml/badge.svg)
 
 ## Examples
 
