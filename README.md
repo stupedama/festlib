@@ -49,17 +49,17 @@ if let Some(p) = package {
 }
 ```
 
-## tests
+## Tests
 Before you run tests you need to download the fest file and store it
 in the project directory.
 
-### download fest file
+### Download fest file
 ```
 wget https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251_inst.zip
 unzip fest251.xml
 ```
 
-### running tests
+### Running tests
 ```
 cargo test
 ```
