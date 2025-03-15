@@ -179,6 +179,8 @@ impl Package {
 }
 
 
+/// Part of Interaction. Is the Substance
+/// that interacts with other substances
 #[derive(Debug, Clone)]
 pub struct Substance {
     name: String,
