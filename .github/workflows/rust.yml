@@ -19,7 +19,7 @@ jobs:
     - name: Download fest file from DMP
       run: wget https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251_inst.zip
     - name: Extract the fest file
-      run: 7z x archive.zip
+      run: 7z x fest251_inst.zip
     - name: Build
       run: cargo build --verbose
     - name: Run tests
