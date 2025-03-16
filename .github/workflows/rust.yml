@@ -20,8 +20,6 @@ jobs:
       run: wget https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251.zip
     - name: Extract the fest file
       run: 7z x fest251.zip
-    - name: Rename fest file
-      run: mv fest251_inst.xml fest251.xml
     - name: Build
       run: cargo build --verbose
     - name: Run tests
