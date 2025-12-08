@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FEST>
+    <HentetDato>2024-09-09T14:21:28</HentetDato>
+    
+    <!-- Packages Section -->
+    <KatLegemiddelpakning>
+        <!-- Test Package 1 -->
+        <OppfLegemiddelpakning>
+            <Id>ID_F994748F-3A21-4FC3-9964-DBE097924A75</Id>
+            <Tidspunkt>2024-04-21T00:51:31</Tidspunkt>
+            <Status V="A" DN="Active"/>
+            <Legemiddelpakning>
+                <Id>ID_0138BA04-7B67-4FB5-B44D-7491336CAF20</Id>
+                <NavnFormStyrke>Test Medicine 10mg Kapsel</NavnFormStyrke>
+                <Varenr>061561</Varenr>
+                <Ean>7001234567890</Ean>
+                <Atc V="A01AA01" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code"/>
+                <Reseptgruppe V="A" DN="Prescription required"/>
+                <LegemiddelformKort V="32" S="2.16.578.1.12.4.1.1.7448" DN="Kapsel"/>
+                <PakningByttegruppe>
+                    <RefByttegruppe>BYTTE001</RefByttegruppe>
+                </PakningByttegruppe>
+            </Legemiddelpakning>
+        </OppfLegemiddelpakning>
+        
+        <!-- Test Package 2 -->
+        <OppfLegemiddelpakning>
+            <Id>ID_TEST002-4FC3-9964-DBE097924A75</Id>
+            <Tidspunkt>2024-04-21T00:52:31</Tidspunkt>
+            <Status V="A" DN="Active"/>
+            <Legemiddelpakning>
+                <Id>ID_PACKAGE002-7B67-4FB5-B44D-7491336CAF20</Id>
+                <NavnFormStyrke>Test Medicine 20mg Tablet</NavnFormStyrke>
+                <Varenr>953335</Varenr>
+                <Ean>7001234567891</Ean>
+                <Atc V="A01AA02" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code 2"/>
+                <Reseptgruppe V="A" DN="Prescription required"/>
+                <LegemiddelformKort V="31" S="2.16.578.1.12.4.1.1.7448" DN="Tablet"/>
+                <PakningByttegruppe>
+                    <RefByttegruppe>BYTTE001</RefByttegruppe>
+                </PakningByttegruppe>
+            </Legemiddelpakning>
+        </OppfLegemiddelpakning>
+        
+        <!-- Test Package 3 -->
+        <OppfLegemiddelpakning>
+            <Id>ID_TEST003-4FC3-9964-DBE097924A75</Id>
+            <Tidspunkt>2024-04-21T00:53:31</Tidspunkt>
+            <Status V="A" DN="Active"/>
+            <Legemiddelpakning>
+                <Id>ID_PACKAGE003-7B67-4FB5-B44D-7491336CAF20</Id>
+                <NavnFormStyrke>Test Medicine 5mg Solution</NavnFormStyrke>
+                <Varenr>017701</Varenr>
+                <Ean>7001234567892</Ean>
+                <Atc V="B01AA03" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code 3"/>
+                <Reseptgruppe V="A" DN="Prescription required"/>
+            </Legemiddelpakning>
+        </OppfLegemiddelpakning>
+        
+        <!-- Test Package 4 -->
+        <OppfLegemiddelpakning>
+            <Id>ID_TEST004-4FC3-9964-DBE097924A75</Id>
+            <Tidspunkt>2024-04-21T00:54:31</Tidspunkt>
+            <Status V="A" DN="Active"/>
+            <Legemiddelpakning>
+                <Id>ID_PACKAGE004-7B67-4FB5-B44D-7491336CAF20</Id>
+                <NavnFormStyrke>Generic Test Medicine 10mg Kapsel</NavnFormStyrke>
+                <Varenr>123456</Varenr>
+                <Ean>7001234567893</Ean>
+                <Atc V="A01AA01" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code"/>
+                <Reseptgruppe V="A" DN="Prescription required"/>
+                <PakningByttegruppe>
+                    <RefByttegruppe>BYTTE001</RefByttegruppe>
+                </PakningByttegruppe>
+            </Legemiddelpakning>
+        </OppfLegemiddelpakning>
+        
+        <!-- Test Package 5 - Another generic in same group -->
+        <OppfLegemiddelpakning>
+            <Id>ID_TEST005-4FC3-9964-DBE097924A75</Id>
+            <Tidspunkt>2024-04-21T00:55:31</Tidspunkt>
+            <Status V="A" DN="Active"/>
+            <Legemiddelpakning>
+                <Id>ID_PACKAGE005-7B67-4FB5-B44D-7491336CAF20</Id>
+                <NavnFormStyrke>Another Generic Test Medicine 10mg Kapsel</NavnFormStyrke>
+                <Varenr>654321</Varenr>
+                <Ean>7001234567894</Ean>
+                <Atc V="A01AA01" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code"/>
+                <Reseptgruppe V="A" DN="Prescription required"/>
+                <PakningByttegruppe>
+                    <RefByttegruppe>BYTTE001</RefByttegruppe>
+                </PakningByttegruppe>
+            </Legemiddelpakning>
+        </OppfLegemiddelpakning>
+    </KatLegemiddelpakning>
+    
+    <!-- Interactions Section -->
+    <KatInteraksjon>
+        <OppfInteraksjon>
+            <Id>ID_INT001-C908-43D8-AA07-9F8F00E6E7A3</Id>
+            <Tidspunkt>2024-04-21T01:00:00</Tidspunkt>
+            <Status V="A" DN="Active"/>
+            <Interaksjon>
+                <Id>ID_028A3D4C-C908-43D8-AA07-9F8F00E6E7A3</Id>
+                <Relevans V="3" DN="Major"/>
+                <KliniskKonsekvens>May cause severe interaction</KliniskKonsekvens>
+                <Interaksjonsmekanisme>Competitive inhibition</Interaksjonsmekanisme>
+                <Kildegrunnlag V="1" DN="Clinical studies"/>
+                <Handtering>Monitor patient closely</Handtering>
+                
+                <Substansgruppe>
+                    <Substans>
+                        <Substans>Test Substance A</Substans>
+                        <Atc V="A01AA01" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code"/>
+                    </Substans>
+                </Substansgruppe>
+                
+                <Substansgruppe>
+                    <Substans>
+                        <Substans>Test Substance B</Substans>
+                        <Atc V="B01AA03" S="2.16.578.1.12.4.1.1.7180" DN="Test ATC Code 3"/>
+                    </Substans>
+                </Substansgruppe>
+            </Interaksjon>
+        </OppfInteraksjon>
+    </KatInteraksjon>
+</FEST>

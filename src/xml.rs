@@ -71,7 +71,7 @@ pub fn string_value(node: &Node, tag: &str) -> String {
 /// ```
 /// use festlib::Fest;
 ///
-/// let fest = Fest::new("fest251.xml").unwrap();
+/// let fest = Fest::new("test_fest.xml").unwrap();
 /// let date = fest.delivery_date();
 ///
 /// assert_eq!("2024-09-09T14:21:28", date.date());
@@ -244,21 +244,39 @@ pub fn exchange_group(node: &Node) -> Option<ExchangeGroup> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use roxmltree::NodeId;
     use std::fs;
 
     // get the file content
     fn file_content() -> String {
-        fs::read_to_string("fest251.xml").unwrap()
+        fs::read_to_string("test_fest.xml").unwrap()
+    }
+
+    // Helper function to find first OppfLegemiddelpakning node
+    fn find_first_package_node<'a>(doc: &'a Document) -> Option<Node<'a, 'a>> {
+        for node in doc.root_element().children() {
+            if node.has_tag_name("KatLegemiddelpakning") {
+                for child in node.children() {
+                    if child.has_tag_name("OppfLegemiddelpakning") {
+                        return Some(child);
+                    }
+                }
+            }
+        }
+        None
     }
 
     #[test]
     fn test_document() {
         let content = file_content();
-
         let document = document(&content);
-
         assert_eq!(document.root_element().has_tag_name("FEST"), true);
+    }
+
+    #[test]
+    fn test_delivery_date() {
+        let content = file_content();
+        let date = delivery_date(&content);
+        assert_eq!(date, "2024-09-09T14:21:28");
     }
 
     #[test]
@@ -266,12 +284,13 @@ mod tests {
         let content = file_content();
         let document = document(&content);
 
-        let node = document.get_node(NodeId::new(701764)).unwrap();
-
-        let (res1, res2) = metadata(&node);
-
-        assert_eq!(res1, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
-        assert_eq!(res2, "2024-04-21T00:51:31");
+        if let Some(node) = find_first_package_node(&document) {
+            let (res1, res2) = metadata(&node);
+            assert_eq!(res1, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
+            assert_eq!(res2, "2024-04-21T00:51:31");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 
     #[test]
@@ -279,11 +298,12 @@ mod tests {
         let content = file_content();
         let document = document(&content);
 
-        let node = document.get_node(NodeId::new(701764)).unwrap();
-
-        let (res1, _) = cs(&node, "Status");
-
-        assert_eq!(res1, "A");
+        if let Some(node) = find_first_package_node(&document) {
+            let (res1, _) = cs(&node, "Status");
+            assert_eq!(res1, "A");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 
     #[test]
@@ -291,23 +311,21 @@ mod tests {
         let content = file_content();
         let document = document(&content);
 
-        let node = document.get_node(NodeId::new(701764)).unwrap();
-
-        let mut move_forward = None;
-
-        // lets move the node into <Legemiddelpakning>
-        for x in node.children() {
-            if x.has_tag_name("Legemiddelpakning") {
-                move_forward = Some(x.clone());
-                break;
+        if let Some(node) = find_first_package_node(&document) {
+            // Navigate to the Legemiddelpakning child
+            for child in node.children() {
+                if child.has_tag_name("Legemiddelpakning") {
+                    let (res1, res2, res3) = cv(&child, "LegemiddelformKort");
+                    assert_eq!(res1, "32");
+                    assert_eq!(res2, "2.16.578.1.12.4.1.1.7448");
+                    assert_eq!(res3, "Kapsel");
+                    return;
+                }
             }
+            panic!("Could not find Legemiddelpakning node");
+        } else {
+            panic!("Could not find package node");
         }
-
-        let (res1, res2, res3) = cv(&move_forward.unwrap(), "LegemiddelformKort");
-
-        assert_eq!(res1, "32");
-        assert_eq!(res2, "2.16.578.1.12.4.1.1.7448");
-        assert_eq!(res3, "Kapsel");
     }
 
     #[test]
@@ -315,10 +333,12 @@ mod tests {
         let content = file_content();
         let document = document(&content);
 
-        let node = document.get_node(NodeId::new(701764)).unwrap();
-
-        let id = string_value(&node, "Id");
-        assert_eq!(id, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
+        if let Some(node) = find_first_package_node(&document) {
+            let id = string_value(&node, "Id");
+            assert_eq!(id, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 
     #[test]
@@ -326,11 +346,14 @@ mod tests {
         let content = file_content();
         let document = document(&content);
 
-        let node = document.get_node(NodeId::new(701764)).unwrap();
-
-        let package = package(&node);
-        assert_eq!(package.as_ref().unwrap().id(), "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
-        assert_eq!(package.unwrap().itemnum(), "953335");
+        if let Some(node) = find_first_package_node(&document) {
+            let package = package(&node);
+            assert!(package.is_some());
+            assert_eq!(package.as_ref().unwrap().id(), "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
+            assert_eq!(package.unwrap().itemnum(), "061561");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 
     #[test]
@@ -339,7 +362,7 @@ mod tests {
         let document = document(&content);
 
         let packages = packages(&document);
-        assert_eq!(packages.len(), 10473);
+        assert_eq!(packages.len(), 5);
     }
 
 //    #[test]

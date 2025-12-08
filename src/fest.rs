@@ -34,7 +34,7 @@ impl Fest {
     /// ```
     /// use festlib::Fest;
     ///
-    /// let fest = Fest::new("fest251.xml").unwrap();
+    /// let fest = Fest::new("test_fest.xml").unwrap();
     /// let date = fest.delivery_date();
     ///
     /// assert_eq!(date.date(), "2024-09-09T14:21:28");
@@ -53,10 +53,10 @@ impl Fest {
     /// ```
     /// use festlib::Fest;
     ///
-    /// let fest = Fest::new("fest251.xml").unwrap();
+    /// let fest = Fest::new("test_fest.xml").unwrap();
     /// let packages = fest.packages();
     ///
-    /// assert_eq!(packages.len(), 10473);
+    /// assert_eq!(packages.len(), 5);
     /// ```
     pub fn packages(&self) -> &Vec<Package> {
         &self.packages
@@ -67,7 +67,7 @@ impl Fest {
     /// # Example
     /// ```
     /// use festlib::Fest;
-    /// let fest = Fest::new("fest251.xml").unwrap();
+    /// let fest = Fest::new("test_fest.xml").unwrap();
     /// let result = fest.find_package("061561");
     ///
     /// assert_eq!(result.unwrap().itemnum(), "061561");
@@ -81,7 +81,7 @@ impl Fest {
     /// # Example
     /// ```
     /// use festlib::Fest;
-    /// let fest = Fest::new("fest251.xml").unwrap();
+    /// let fest = Fest::new("test_fest.xml").unwrap();
     /// let package = fest.find_package("061561").unwrap();
     ///
     /// let result = fest.find_generic(&package);
@@ -201,7 +201,7 @@ mod tests {
 
     #[test]
     fn test_hentetdato() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
         let date = fest.delivery_date();
 
         //let res = file.delivery_date().unwrap().unwrap();
@@ -210,18 +210,18 @@ mod tests {
 
     #[test]
     fn test_fest_packages() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
         let packages = fest.packages();
 
-        assert_eq!(packages.len(), 10473);
+        assert_eq!(packages.len(), 5);
     }
 
     #[test]
     fn test_fest_find_package() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
         let packages = fest.packages();
 
-        assert_eq!(packages.len(), 10473);
+        assert_eq!(packages.len(), 5);
 
         let package = fest.find_package("061561").unwrap();
         assert_eq!(package.itemnum(), "061561");
@@ -244,32 +244,31 @@ mod tests {
 
     #[test]
     fn test_fest_find_generic() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
         let packages = fest.packages();
 
-        assert_eq!(packages.len(), 10473);
+        assert_eq!(packages.len(), 5);
 
         let package = fest.find_package("061561").unwrap();
         assert_eq!(package.itemnum(), "061561");
 
         let result = fest.find_generic(&package);
         assert!(result.is_some());
+        assert_eq!(result.unwrap().len(), 4); // Should find 4 generics with same exchange group
     }
 
     #[test]
     fn test_fest_find_interation() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
 
-        let package1 = fest.find_package("174532").unwrap();
-        let package2 = fest.find_package("403119").unwrap();
-        let package3 = fest.find_package("017646").unwrap();
-        let package4 = fest.find_package("148460").unwrap();
+        let package1 = fest.find_package("061561").unwrap();
+        let package2 = fest.find_package("017701").unwrap();
 
-        let check_interaction = vec![package1, package2, package3, package4];
+        let check_interaction = vec![package1, package2];
         let interaction = fest.find_interaction(&check_interaction);
 
         assert!(interaction.is_some());
-        assert_eq!(interaction.unwrap().len(), 3);
+        assert_eq!(interaction.unwrap().len(), 1); // Our test file has 1 interaction
     }
 
 }

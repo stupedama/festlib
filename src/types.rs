@@ -246,76 +246,94 @@ impl Interaction {
 mod tests {
     use super::*;
     use crate::Fest;
-    use roxmltree::NodeId;
+
+
+    // Helper function to find first OppfLegemiddelpakning node
+    fn find_first_package_node<'a>(doc: &'a roxmltree::Document) -> Option<roxmltree::Node<'a, 'a>> {
+        for node in doc.root_element().children() {
+            if node.has_tag_name("KatLegemiddelpakning") {
+                for child in node.children() {
+                    if child.has_tag_name("OppfLegemiddelpakning") {
+                        return Some(child);
+                    }
+                }
+            }
+        }
+        None
+    }
 
     #[test]
     fn test_metadata() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
 
         let content = fest.content;
         let content = roxmltree::Document::parse(&content[0..]).unwrap();
 
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-        let metadata = Metadata::new(&node);
+        if let Some(node) = find_first_package_node(&content) {
+            let metadata = Metadata::new(&node);
 
-        assert_eq!(metadata.id, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
-        assert_eq!(metadata.time, "2024-04-21T00:51:31");
+            assert_eq!(metadata.id, "ID_F994748F-3A21-4FC3-9964-DBE097924A75");
+            assert_eq!(metadata.time, "2024-04-21T00:51:31");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 
     #[test]
     fn test_cs() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
 
         let content = fest.content;
         let content = roxmltree::Document::parse(&content[0..]).unwrap();
 
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-        let metadata = Metadata::new(&node);
-
-        let cs = metadata.status;
-
-        assert_eq!(cs.v, "A");
+        if let Some(node) = find_first_package_node(&content) {
+            let metadata = Metadata::new(&node);
+            let cs = metadata.status;
+            assert_eq!(cs.v, "A");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 
     #[test]
     fn test_cv() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
 
         let content = fest.content;
         let content = roxmltree::Document::parse(&content[0..]).unwrap();
 
-        let node = content.get_node(NodeId::new(701764)).unwrap();
-
-        let mut move_forward = None;
-
-        // lets move the node into <Legemiddelpakning>
-        for x in node.children() {
-            if x.has_tag_name("Legemiddelpakning") {
-                move_forward = Some(x.clone());
-                break;
+        if let Some(node) = find_first_package_node(&content) {
+            // Navigate to the Legemiddelpakning child
+            for child in node.children() {
+                if child.has_tag_name("Legemiddelpakning") {
+                    let cv = Cv::new(&child, "LegemiddelformKort");
+                    assert_eq!(cv.v, "32");
+                    assert_eq!(cv.s, "2.16.578.1.12.4.1.1.7448");
+                    assert_eq!(cv.dn, "Kapsel");
+                    return;
+                }
             }
+            panic!("Could not find Legemiddelpakning node");
+        } else {
+            panic!("Could not find package node");
         }
-
-        let cv = Cv::new(&move_forward.unwrap(), "LegemiddelformKort");
-
-        assert_eq!(cv.v, "32");
-        assert_eq!(cv.s, "2.16.578.1.12.4.1.1.7448");
-        assert_eq!(cv.dn, "Kapsel");
     }
 
     #[test]
     fn test_package() {
-        let fest = Fest::new("fest251.xml").unwrap();
+        let fest = Fest::new("test_fest.xml").unwrap();
 
         let content = fest.content;
         let content = roxmltree::Document::parse(&content[0..]).unwrap();
 
-        let node = content.get_node(NodeId::new(701764)).unwrap();
+        if let Some(node) = find_first_package_node(&content) {
+            let package = Package::new(&node).unwrap();
 
-        let package = Package::new(&node).unwrap();
-
-        assert_eq!(package.id, "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
-        assert_eq!(package.itemnum, "953335");
-        assert_eq!(package.ean, "6430013130724");
+            assert_eq!(package.id, "ID_0138BA04-7B67-4FB5-B44D-7491336CAF20");
+            assert_eq!(package.itemnum, "061561");
+            assert_eq!(package.ean, "7001234567890");
+        } else {
+            panic!("Could not find package node");
+        }
     }
 }

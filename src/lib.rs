@@ -11,7 +11,7 @@
 //! ```
 //! use festlib::Fest;
 //!
-//! let fest = Fest::new("fest251.xml").unwrap();
+//! let fest = Fest::new("test_fest.xml").unwrap();
 //! let date = fest.delivery_date();
 //!
 //! assert_eq!(date.date(), "2024-09-09T14:21:28");
@@ -21,16 +21,16 @@
 //! ```
 //! use festlib::Fest;
 //!
-//! let fest = Fest::new("fest251.xml").unwrap();
+//! let fest = Fest::new("test_fest.xml").unwrap();
 //! let packages = fest.packages();
 //!
-//! assert_eq!(packages.len(), 10473);
+//! assert_eq!(packages.len(), 5);
 //! ```
 //!
 //! ### Find generic packages
 //! ```
 //! use festlib::Fest;
-//! let fest = Fest::new("fest251.xml").unwrap();
+//! let fest = Fest::new("test_fest.xml").unwrap();
 //! let package = fest.find_package("061561").unwrap();
 //!
 //! let result = fest.find_generic(&package);
