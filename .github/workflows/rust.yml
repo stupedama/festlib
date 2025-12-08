@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download fest file from DMP
-      run: wget https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251.zip
+      run: wget https://www.dmp.no/globalassets/documents/om-oss/distribusjon-av-legemiddeldata/fest/festfiler/fest251.zip
     - name: Extract the fest file
       run: 7z x fest251.zip
     - name: Build
