@@ -164,12 +164,7 @@ impl Fest {
                     result.push(c.clone());
                 }
             }
-            count = 0;
         }
-
-        println!("size interaction: {}", interactions.len());
-        println!("size collection: {}", collection.len());
-
 
         // TODO: maybe we should store the result in a map?
         // clear our result with dublicate interactions
