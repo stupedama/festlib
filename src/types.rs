@@ -115,7 +115,7 @@ impl Metadata {
 }
 
 /// Holds the information about the drug package (Legemiddelpakning).
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Package {
     metadata: Metadata,
     atc: Cv,

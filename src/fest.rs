@@ -73,7 +73,7 @@ impl Fest {
     /// assert_eq!(result.unwrap().itemnum(), "061561");
     /// ```
     pub fn find_package(&self, itemnum: &str) -> Option<&Package> {
-        self.packages().iter().find(|p| p.itemnum() == itemnum)
+       self.packages().iter().find(|p| p.itemnum() == itemnum)
     }
 
     /// Search for generic products of a Package
@@ -86,23 +86,25 @@ impl Fest {
     ///
     /// let result = fest.find_generic(&package);
     /// ```
-    pub fn find_generic(&self, package: &Package) -> Option<Vec<Package>> {
+    pub fn find_generic(&self, package: &Package) -> Option<Vec<&Package>> {
 
         // if the package dont have any id theres no geneirc products for it
         if package.exchange_id().is_none() {
             return None;
         }
 
-        let result = self.packages
+        let result: Vec<&Package> = self.packages
             .iter()
             .filter(|p|
                 p.exchange_id() ==
                 package.exchange_id())
-            .cloned()
             .collect();
 
-        Some(result)
-
+        if result.len() > 0 {
+            Some(result)
+        } else {
+            None
+        }
     }
 
     /// Search for interactions for two or more packages
