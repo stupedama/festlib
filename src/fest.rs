@@ -112,10 +112,10 @@ impl Fest {
     /// # Example
     /// ```
     /// use festlib::Fest;
-    /// let fest = Fest::new("fest251.xml").unwrap();
+    /// let fest = Fest::new("test_fest.xml").unwrap();
     ///
-    /// let package1 = fest.find_package("174532").unwrap();
-    /// let package2 = fest.find_package("153742").unwrap();
+    /// let package1 = fest.find_package("061561").unwrap();
+    /// let package2 = fest.find_package("017701").unwrap();
     ///
     /// let check_interaction = vec![package1, package2];
     /// let interaction = fest.find_interaction(&check_interaction);
@@ -195,7 +195,7 @@ mod tests {
 
     #[test]
     fn test_read_file() {
-        let file = Fest::read_file("fest251.xml");
+        let file = Fest::read_file("test_fest.xml");
         assert!(file.is_ok());
     }
 
