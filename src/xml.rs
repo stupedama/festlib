@@ -2,13 +2,13 @@ use crate::types::{Cs, Cv, ExchangeGroup, Metadata, Package, Interaction, Substa
 use roxmltree::{Document, Node};
 
 /// Parses the content string into a roxmltree::Document
-pub fn document(content: &str) -> Document<'_> {
+pub(crate) fn document(content: &str) -> Document<'_> {
     // panic if invalid xml
     roxmltree::Document::parse(&content[0..]).unwrap()   
 }
 
 /// Extract a Coded Simple Value from xml
-pub fn cs(node: &Node, tag: &str) -> (String, String) {
+pub(crate) fn cs(node: &Node, tag: &str) -> (String, String) {
     node.children()
         .find(|n| n.has_tag_name(tag))
         .map(|n| {
@@ -20,7 +20,7 @@ pub fn cs(node: &Node, tag: &str) -> (String, String) {
 }
 
 /// Extract a Coded Value from xml
-pub fn cv(node: &Node, tag: &str) -> (String, String, String) {
+pub(crate) fn cv(node: &Node, tag: &str) -> (String, String, String) {
     node.children()
         .find(|n| n.has_tag_name(tag))
         .map(|n| {
@@ -33,7 +33,7 @@ pub fn cv(node: &Node, tag: &str) -> (String, String, String) {
 }
 
 /// Extract a single value from a node
-pub fn string_value(node: &Node, tag: &str) -> String {
+pub(crate) fn string_value(node: &Node, tag: &str) -> String {
     node.children()
         .find(|n| n.has_tag_name(tag))
         .and_then(|n| n.text())
@@ -53,14 +53,14 @@ pub fn string_value(node: &Node, tag: &str) -> String {
 ///
 /// assert_eq!("2024-09-09T14:21:28", date.date());
 /// ```
-pub fn delivery_date(content: &String) -> String {
+pub(crate) fn delivery_date(content: &String) -> String {
     string_value(&document(content).root_element(), "HentetDato")
 }
 
 /// Retreives the Metadata from xml string
 /// Its the <Enkeltoppforing> that contains unique id,
 /// time of creation and status
-pub fn metadata(node: &Node) -> (String, String) {
+pub(crate) fn metadata(node: &Node) -> (String, String) {
     let id = string_value(&node, "Id");
     let time = string_value(&node, "Tidspunkt");
 
@@ -68,7 +68,7 @@ pub fn metadata(node: &Node) -> (String, String) {
 }
 
 /// Retrieves the xml from <OppfInteraksjon>
-pub fn interaction(node: &Node) -> Option<Interaction> {
+pub(crate) fn interaction(node: &Node) -> Option<Interaction> {
     let metadata = Metadata::new(node);
     let node = move_node_forward(&node, "Interaksjon")?;
 
@@ -104,7 +104,7 @@ pub fn interaction(node: &Node) -> Option<Interaction> {
 }
 
 /// Retrives the xml data from <OppfLegemiddelpakning>
-pub fn package(node: &Node) -> Option<Package> {
+pub(crate) fn package(node: &Node) -> Option<Package> {
     let metadata = Metadata::new(node);
     let node = move_node_forward(&node, "Legemiddelpakning")?;
 
@@ -121,7 +121,7 @@ pub fn package(node: &Node) -> Option<Package> {
 }
 
 /// Retrieves all the packages (OppfLegemiddelpakning) from the xml file
-pub fn packages(document: &Document) -> Vec<Package> {
+pub(crate) fn packages(document: &Document) -> Vec<Package> {
     document
         .root_element()
         .children()
@@ -134,7 +134,7 @@ pub fn packages(document: &Document) -> Vec<Package> {
 }
 
 /// Retreives all the interactions (OppfInteraksjon) from the xml file
-pub fn interactions(document: &Document) -> Vec<Interaction> {
+pub(crate) fn interactions(document: &Document) -> Vec<Interaction> {
     document
         .root_element()
         .children()
@@ -147,7 +147,7 @@ pub fn interactions(document: &Document) -> Vec<Interaction> {
 }
 
 /// Retrieves the Exchange group. <PakningByttegruppe>
-pub fn exchange_group(node: &Node) -> Option<ExchangeGroup> {
+pub(crate) fn exchange_group(node: &Node) -> Option<ExchangeGroup> {
     node.children()
         .find(|n| n.has_tag_name("PakningByttegruppe"))
         .map(|n| string_value(&n, "RefByttegruppe"))
