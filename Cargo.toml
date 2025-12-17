@@ -20,4 +20,3 @@ opt-level = 1
 
 [dependencies]
 roxmltree = "0.20.0"
-#thiserror = "2.0.11"
