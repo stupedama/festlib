@@ -103,10 +103,6 @@ pub fn interaction(node: &Node) -> Option<Interaction> {
     ))
 }
 
-fn move_node_forward<'a>(node: &'a Node, destination: &str) -> Option<Node<'a, 'a>> {
-    node.children().find(|n| n.has_tag_name(destination))
-}
-
 /// Retrives the xml data from <OppfLegemiddelpakning>
 pub fn package(node: &Node) -> Option<Package> {
     let metadata = Metadata::new(node);
@@ -157,6 +153,11 @@ pub fn exchange_group(node: &Node) -> Option<ExchangeGroup> {
         .map(|n| string_value(&n, "RefByttegruppe"))
         .filter(|id| !id.is_empty())
         .and_then(|id| ExchangeGroup::from(id, None, None))
+}
+
+// moves the xml node forward
+fn move_node_forward<'a>(node: &'a Node, destination: &str) -> Option<Node<'a, 'a>> {
+    node.children().find(|n| n.has_tag_name(destination))
 }
 
 #[cfg(test)]
