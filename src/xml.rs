@@ -9,60 +9,36 @@ pub fn document(content: &str) -> Document<'_> {
 
 /// Extract a Coded Simple Value from xml
 pub fn cs(node: &Node, tag: &str) -> (String, String) {
-    let mut v = String::new();
-    let mut dn = String::new();
-
-    for n in node.children() {
-        if n.has_tag_name(tag) {
-            if let Some(val) = n.attribute("V") {
-                v.push_str(val);
-            }
-
-            if let Some(val) = n.attribute("DN") {
-                dn.push_str(val);
-            }
-        }
-    }
-
-    (v, dn)
+    node.children()
+        .find(|n| n.has_tag_name(tag))
+        .map(|n| {
+            let v = n.attribute("V").unwrap_or("").to_string();
+            let dn = n.attribute("DN").unwrap_or("").to_string();
+            (v, dn)
+        })
+        .unwrap_or_default()
 }
 
 /// Extract a Coded Value from xml
 pub fn cv(node: &Node, tag: &str) -> (String, String, String) {
-    let mut v = String::new();
-    let mut s = String::new();
-    let mut dn = String::new();
-
-    for n in node.children() {
-        if n.has_tag_name(tag) {
-            if let Some(val) = n.attribute("V") {
-                v.push_str(val);
-            }
-
-            if let Some(val) = n.attribute("S") {
-                s.push_str(val);
-            }
-
-            if let Some(val) = n.attribute("DN") {
-                dn.push_str(val);
-            }
-        }
-    }
-    (v, s, dn)
+    node.children()
+        .find(|n| n.has_tag_name(tag))
+        .map(|n| {
+            let v = n.attribute("V").unwrap_or("").to_string();
+            let s = n.attribute("S").unwrap_or("").to_string();
+            let dn = n.attribute("DN").unwrap_or("").to_string();
+            (v, s, dn)
+        })
+        .unwrap_or_default()
 }
 
 /// Extract a single value from a node
 pub fn string_value(node: &Node, tag: &str) -> String {
-    let mut result = String::new();
-
-    for n in node.children() {
-            if n.has_tag_name(tag) {
-                if let Some(val) = n.text() {
-                    result.push_str(val);
-                }
-            }
-    }
-    result
+    node.children()
+        .find(|n| n.has_tag_name(tag))
+        .and_then(|n| n.text())
+        .unwrap_or("")
+        .to_string()
 }
 
 /// Extracts the <HentetDato></HentetDato> from the xml file
@@ -94,11 +70,8 @@ pub fn metadata(node: &Node) -> (String, String) {
 /// Retrieves the xml from <OppfInteraksjon>
 pub fn interaction(node: &Node) -> Option<Interaction> {
     let metadata = Metadata::new(node);
+    let node = move_node_forward(&node, "Interaksjon")?;
 
-    let node = move_node_forward(&node, "Interaksjon");
-
-    match node {
-        Some(node) => {
     let id = string_value(&node, "Id");
     let relevance = Cs::new(&node, "Relevans");
     let consequence = string_value(&node, "KliniskKonsekvens");
@@ -106,20 +79,17 @@ pub fn interaction(node: &Node) -> Option<Interaction> {
     let basis = Cs::new(&node, "Kildegrunnlag");
     let handling = string_value(&node, "Handtering");
 
-    // get all the subtances
-    let mut substances = Vec::new();
-
-    for x in node.children() {
-        if x.has_tag_name("Substansgruppe") {
-            for s in x.children() {
-                if s.has_tag_name("Substans") {
-                    let name = string_value(&s, "Substans");
-                    let atc = Cv::new(&s, "Atc");
-                    substances.push(Substance::new(name, atc));
-                }
-            }
-        }
-    }
+    let substances: Vec<Substance> = node
+        .children()
+        .filter(|x| x.has_tag_name("Substansgruppe"))
+        .flat_map(|x| x.children())
+        .filter(|s| s.has_tag_name("Substans"))
+        .map(|s| {
+            let name = string_value(&s, "Substans");
+            let atc = Cv::new(&s, "Atc");
+            Substance::new(name, atc)
+        })
+        .collect();
 
     Some(Interaction::new(
         metadata,
@@ -131,115 +101,62 @@ pub fn interaction(node: &Node) -> Option<Interaction> {
         handling,
         substances
     ))
-        },
-        None => None,
-    }
 }
 
-fn move_node_forward<'a>(node: &'a Node, destination: &'a str) -> Option<Node<'a, 'a>>{
-    let mut new_node = None;
-
-    // lets move the node into <Legemiddelpakning>
-    for x in node.children() {
-        if x.has_tag_name(destination) {
-            new_node = Some(x.clone());
-            break;
-        }
-    }
-    new_node
+fn move_node_forward<'a>(node: &'a Node, destination: &str) -> Option<Node<'a, 'a>> {
+    node.children().find(|n| n.has_tag_name(destination))
 }
 
 /// Retrives the xml data from <OppfLegemiddelpakning>
 pub fn package(node: &Node) -> Option<Package> {
     let metadata = Metadata::new(node);
+    let node = move_node_forward(&node, "Legemiddelpakning")?;
 
-    let node = move_node_forward(&node, "Legemiddelpakning");
-
-    match node {
-        Some(node) => {
-            let atc = Cv::new(&node, "Atc");
-            let name = string_value(&node, "NavnFormStyrke");
-            let group = Cs::new(&node, "Reseptgruppe");
-            let id = string_value(&node, "Id");
-            let itemnum = string_value(&node, "Varenr");
-            let ean = string_value(&node, "Ean");
-            let exchange_group = exchange_group(&node);
-
-            Package::from(
-                metadata,
-                atc,
-                name,
-                group,
-                id,
-                itemnum,
-                ean,
-                exchange_group,
-            )
-    },
-        None => None,
-    }
+    Package::from(
+        metadata,
+        Cv::new(&node, "Atc"),
+        string_value(&node, "NavnFormStyrke"),
+        Cs::new(&node, "Reseptgruppe"),
+        string_value(&node, "Id"),
+        string_value(&node, "Varenr"),
+        string_value(&node, "Ean"),
+        exchange_group(&node),
+    )
 }
 
 /// Retrieves all the packages (OppfLegemiddelpakning) from the xml file
 pub fn packages(document: &Document) -> Vec<Package> {
-    let mut result = Vec::new();
-    let node = document.root_element();
-
-    for n in node.children() {
-        if n.has_tag_name("KatLegemiddelpakning") {
-
-            for x in n.children() {
-                if x.has_tag_name("OppfLegemiddelpakning") {
-                    if let Some(p) = package(&x) {
-                        result.push(p);
-                    }
-                }
-            }
-        }
-    }
-    result
+    document
+        .root_element()
+        .children()
+        .find(|n| n.has_tag_name("KatLegemiddelpakning"))
+        .into_iter()
+        .flat_map(|n| n.children())
+        .filter(|x| x.has_tag_name("OppfLegemiddelpakning"))
+        .filter_map(|x| package(&x))
+        .collect()
 }
 
 /// Retreives all the interactions (OppfInteraksjon) from the xml file
 pub fn interactions(document: &Document) -> Vec<Interaction> {
-    let mut result = Vec::new();
-
-    let node = document.root_element();
-
-    for n in node.children() {
-        if n.has_tag_name("KatInteraksjon") {
-
-            for x in n.children() {
-                if x.has_tag_name("OppfInteraksjon") {
-                    if let Some(i) = interaction(&x) {
-                        result.push(i);
-                    }
-                }
-            }
-        }
-    }
-    result
+    document
+        .root_element()
+        .children()
+        .find(|n| n.has_tag_name("KatInteraksjon"))
+        .into_iter()
+        .flat_map(|n| n.children())
+        .filter(|x| x.has_tag_name("OppfInteraksjon"))
+        .filter_map(|x| interaction(&x))
+        .collect()
 }
 
 /// Retrieves the Exchange group. <PakningByttegruppe>
 pub fn exchange_group(node: &Node) -> Option<ExchangeGroup> {
-    let mut id = String::new();
-
-    for n in node.children() {
-        if n.has_tag_name("PakningByttegruppe") {
-            id = string_value(&n, "RefByttegruppe");
-        }
-    }
-
-    if id.len() > 0 {
-        ExchangeGroup::from(
-            id,
-            None,
-            None,
-        )
-        } else {
-        None
-    }
+    node.children()
+        .find(|n| n.has_tag_name("PakningByttegruppe"))
+        .map(|n| string_value(&n, "RefByttegruppe"))
+        .filter(|id| !id.is_empty())
+        .and_then(|id| ExchangeGroup::from(id, None, None))
 }
 
 #[cfg(test)]
@@ -254,16 +171,10 @@ mod tests {
 
     // Helper function to find first OppfLegemiddelpakning node
     fn find_first_package_node<'a>(doc: &'a Document) -> Option<Node<'a, 'a>> {
-        for node in doc.root_element().children() {
-            if node.has_tag_name("KatLegemiddelpakning") {
-                for child in node.children() {
-                    if child.has_tag_name("OppfLegemiddelpakning") {
-                        return Some(child);
-                    }
-                }
-            }
-        }
-        None
+        doc.root_element()
+            .children()
+            .find(|n| n.has_tag_name("KatLegemiddelpakning"))
+            .and_then(|n| n.children().find(|c| c.has_tag_name("OppfLegemiddelpakning")))
     }
 
     #[test]
