@@ -260,16 +260,11 @@ mod tests {
 
     // Helper function to find first OppfLegemiddelpakning node
     fn find_first_package_node<'a>(doc: &'a roxmltree::Document) -> Option<roxmltree::Node<'a, 'a>> {
-        for node in doc.root_element().children() {
-            if node.has_tag_name("KatLegemiddelpakning") {
-                for child in node.children() {
-                    if child.has_tag_name("OppfLegemiddelpakning") {
-                        return Some(child);
-                    }
-                }
-            }
-        }
-        None
+        doc.root_element()
+            .children()
+            .find(|n| n.has_tag_name("KatLegemiddelpakning"))?
+            .children()
+            .find(|n| n.has_tag_name("OppfLegemiddelpakning"))
     }
 
     #[test]
