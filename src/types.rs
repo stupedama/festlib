@@ -21,7 +21,7 @@ impl LastUpdate {
 }
 
 /// Holds the id reference for generic packages/drugs
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ExchangeGroup {
     id: String,
     valid_from: Option<String>,
@@ -49,7 +49,7 @@ impl ExchangeGroup {
 /// Coded Simple Value
 /// Gives a codes value with a String with an option
 /// to give the 'v' a meaning 'dn'
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Cs {
     v: String,
     dn: String,
@@ -70,7 +70,7 @@ impl Cs {
 /// s = oid.
 /// the oid have a constant value but the last part
 /// is the identifier
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Cv {
     v: String,
     s: String,
@@ -181,7 +181,7 @@ impl Package {
 
 /// Part of Interaction. Is the Substance
 /// that interacts with other substances
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Substance {
     name: String,
     atc: Cv,
@@ -246,7 +246,6 @@ impl Interaction {
 mod tests {
     use super::*;
     use crate::Fest;
-
 
     // Helper function to find first OppfLegemiddelpakning node
     fn find_first_package_node<'a>(doc: &'a roxmltree::Document) -> Option<roxmltree::Node<'a, 'a>> {
