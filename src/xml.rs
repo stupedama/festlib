@@ -2,8 +2,9 @@ use crate::types::{Cs, Cv, ExchangeGroup, Metadata, Package, Interaction, Substa
 use roxmltree::{Document, Node};
 
 /// Parses the content string into a roxmltree::Document
-pub fn document(content: &String) -> Document {
-    roxmltree::Document::parse(&content[0..]).unwrap()
+pub fn document(content: &str) -> Document<'_> {
+    // panic if invalid xml
+    roxmltree::Document::parse(&content[0..]).unwrap()   
 }
 
 /// Extract a Coded Simple Value from xml
