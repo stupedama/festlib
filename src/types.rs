@@ -1,6 +1,9 @@
 use roxmltree::Node;
 use crate::xml;
 
+// TODO: remove #[allow(dead_code)] and implement all the missing parts
+// of the structs that have this attribute.
+
 /// Holds the last date for when the fest was last
 /// updated. (HentetDato).
 pub struct LastUpdate {
@@ -21,6 +24,7 @@ impl LastUpdate {
 }
 
 /// Holds the id reference for generic packages/drugs
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct ExchangeGroup {
     id: String,
@@ -49,6 +53,7 @@ impl ExchangeGroup {
 /// Coded Simple Value
 /// Gives a codes value with a String with an option
 /// to give the 'v' a meaning 'dn'
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Cs {
     v: String,
@@ -70,6 +75,7 @@ impl Cs {
 /// s = oid.
 /// the oid have a constant value but the last part
 /// is the identifier
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Cv {
     v: String,
@@ -94,6 +100,7 @@ impl Cv {
 }
 
 /// Holds the metadata of the xml entry
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Metadata {
     id: String,
@@ -115,6 +122,7 @@ impl Metadata {
 }
 
 /// Holds the information about the drug package (Legemiddelpakning).
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Package {
     metadata: Metadata,
@@ -206,6 +214,9 @@ impl Substance {
     }
 }
 
+/// Holds the information about an Interaction between two or more 
+/// Packages (substances).
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Interaction {
     metadata: Metadata,
