@@ -123,7 +123,7 @@ impl Fest {
     /// let interaction = fest.find_interaction(&check_interaction);
     ///
     /// ```
-    pub fn find_interaction(&self, packages: &Vec<&Package>) -> Option<Vec<Interaction>> {
+    pub fn find_interaction(&self, packages: &Vec<&Package>) -> Option<Vec<&Interaction>> {
         // TODO: maybe just return None, since there is no drug that have an interaction with
         // itself.
         assert!(packages.len() > 1);
@@ -131,21 +131,21 @@ impl Fest {
         let mut result = Vec::new();
 
         // extract the package atc codes and remove duplicates
-        let mut atc_codes: Vec<String> = packages.iter().map(|p| p.atc().v().clone()).collect();
+        let mut atc_codes: Vec<&String> = packages.iter().map(|p| p.atc().v()).collect();
         atc_codes.dedup();
 
         // first search all interactions for the atc code.
         // if vector > 2 search
 
-        let interactions = self.interactions.clone();
+        let interactions = &self.interactions;
         let mut collection = Vec::new();
 
         // find all matching interaction for our atc codes and store them in
         // a vector
-        for i in &interactions {
+        for i in interactions {
             for s in i.substances() {
                 for a in &atc_codes {
-                    if a == s.atc() {
+                    if *a == s.atc() {
                         collection.push(i);
                     }
                 }
@@ -158,12 +158,12 @@ impl Fest {
             let mut count = 0;
             for a in &atc_codes {
                 for s in c.substances() {
-                    if s.atc() == a {
+                    if s.atc() == *a {
                         count += 1;
                     }
                 }
                 if count > 1 {
-                    result.push(c.clone());
+                    result.push(c);
                 }
             }
         }

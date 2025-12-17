@@ -94,7 +94,7 @@ impl Cv {
 }
 
 /// Holds the metadata of the xml entry
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Metadata {
     id: String,
     time: String,
@@ -206,7 +206,7 @@ impl Substance {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Interaction {
     metadata: Metadata,
     id: String,
