@@ -1,4 +1,5 @@
 use roxmltree::Node;
+use serde::Serialize;
 use crate::xml;
 
 // TODO: remove #[allow(dead_code)] and implement all the missing parts
@@ -6,6 +7,7 @@ use crate::xml;
 
 /// Holds the last date for when the fest was last
 /// updated. (HentetDato).
+#[derive(Serialize)]
 pub struct LastUpdate {
     update: String,
 }
@@ -25,7 +27,7 @@ impl LastUpdate {
 
 /// Holds the id reference for generic packages/drugs
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct ExchangeGroup {
     id: String,
     valid_from: Option<String>,
@@ -54,7 +56,7 @@ impl ExchangeGroup {
 /// Gives a codes value with a String with an option
 /// to give the 'v' a meaning 'dn'
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Cs {
     v: String,
     dn: String,
@@ -69,6 +71,14 @@ impl Cs {
             dn,
         }
     }
+
+    pub fn v(&self) -> &String {
+        &self.v
+    }
+
+    pub fn dn(&self) -> &String {
+        &self.dn
+    }
 }
 
 /// Coded Value with a OID (object identifier)
@@ -76,7 +86,7 @@ impl Cs {
 /// the oid have a constant value but the last part
 /// is the identifier
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Cv {
     v: String,
     s: String,
@@ -97,11 +107,19 @@ impl Cv {
     pub fn v(&self) -> &String {
         &self.v
     }
+
+    pub fn s(&self) -> &String {
+        &self.s
+    }
+
+    pub fn dn(&self) -> &String {
+        &self.dn
+    }
 }
 
 /// Holds the metadata of the xml entry
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Metadata {
     id: String,
     time: String,
@@ -119,11 +137,23 @@ impl Metadata {
             status,
         }
     }
+
+    pub fn id(&self) -> &String {
+        &self.id
+    }
+
+    pub fn time(&self) -> &String {
+        &self.time
+    }
+
+    pub fn status(&self) -> &Cs {
+        &self.status
+    }
 }
 
 /// Holds the information about the drug package (Legemiddelpakning).
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Package {
     metadata: Metadata,
     atc: Cv,
@@ -175,6 +205,26 @@ impl Package {
         &self.id
     }
 
+    /// Returns the name of the package
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    /// Returns the prescription group
+    pub fn group(&self) -> &Cs {
+        &self.group
+    }
+
+    /// Returns the metadata for the entry
+    pub fn metadata(&self) -> &Metadata {
+        &self.metadata
+    }
+
+    /// Returns the exchange group
+    pub fn exchange_group(&self) -> Option<&ExchangeGroup> {
+        self.exchange_group.as_ref()
+    }
+
     /// Returns the exchange id reference for generic
     /// products. Returns None if there is no id
     /// TODO: or the id is not longer valid
@@ -189,7 +239,7 @@ impl Package {
 
 /// Part of Interaction. Is the Substance
 /// that interacts with other substances
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Substance {
     name: String,
     atc: Cv,
@@ -217,7 +267,7 @@ impl Substance {
 /// Holds the information about an Interaction between two or more 
 /// Packages (substances).
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Interaction {
     metadata: Metadata,
     id: String,
